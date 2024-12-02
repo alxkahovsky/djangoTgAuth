@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  django:
+    build: .
+    container_name: django_tg_app
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/usr/src/app
+    # Открытие порта на хостовой машине и перенаправление на порт в контейнере
+    ports:
+      - "8000:8000"
+  tg_bot:
+    build: ./telegram_bot
+    container_name: tg_bot
+    command: python bot.py
+    # https://t.me/yakovlev_auth_bot?start=Token
+    environment:
+      - TOKEN=7787513972:AAE0mCfbkytK-nvevrj-0neukaHAYXE3fVQ
