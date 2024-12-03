@@ -17,8 +17,8 @@ bot.
 
 import logging
 
-from telegram import ForceReply, Update
-from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
+from telegram import ForceReply, Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters, CallbackQueryHandler
 import os
 import httpx
 
@@ -32,24 +32,47 @@ logging.getLogger("httpx").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 
 
-# Define a few command handlers. These usually take the two arguments update and
-# context.
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /start is issued."""
     user = update.effective_user
     token = context.args[0] if context.args else None
+
     if token:
-        telegram_id = update.effective_user.id
-        url = "http://django:8000/auth/complete/"
-        data = {"token": token, "telegram_id": user.id, "telegram_username": user.username}
-        response = httpx.post(url, data=data)
-        logger.info(response.status_code)
+        context.user_data['token'] = token
+        keyboard = [
+            [InlineKeyboardButton("Да", callback_data="yes")],
+            [InlineKeyboardButton("Нет", callback_data="no")]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+
         await update.message.reply_html(
-            rf"Hi {user.mention_html()} \ {token} \ {user.id} \ {user.username}!",
-            reply_markup=ForceReply(selective=True),
+            rf"Hi {user.mention_html()}! Do you want to proceed with token {token}?",
+            reply_markup=reply_markup,
         )
     else:
-        pass
+        await update.message.reply_html(
+            "Please provide a token after the /start command, e.g., /start your_token"
+        )
+
+
+async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handle button press."""
+    query = update.callback_query
+    await query.answer()
+
+    if query.data == 'yes':
+        token = context.user_data.get('token')
+        if token:
+            telegram_id = update.effective_user.id
+            url = "http://django:8000/api/users/telegram/"
+            data = {"telegram_id": telegram_id, "username": update.effective_user.username}
+            response = httpx.post(url, data=data)
+            logger.info(response.status_code)
+            await query.edit_message_text(text=f"Request sent with status code: {response.status_code}")
+        else:
+            await query.edit_message_text(text="Token not found.")
+    elif query.data == 'no':
+        await query.edit_message_text(text="Operation cancelled.")
 
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -65,33 +88,13 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 def main() -> None:
     """Start the bot."""
     token = os.environ.get("TOKEN", "TOKEN")
-    # Create the Application and pass it your bot's token.
     application = Application.builder().token(token).build()
-
-    # on different commands - answer in Telegram
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("help", help_command))
-
-    # on non command i.e message - echo the message on Telegram
+    application.add_handler(CallbackQueryHandler(button_callback))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
-
-    # Run the bot until the user presses Ctrl-C
     application.run_polling(allowed_updates=Update.ALL_TYPES)
 
 
 if __name__ == "__main__":
     main()
-
-# def start(update: Update, context: CallbackContext) -> None:
-#     token = context.args[0] if context.args else None
-#     if token:
-#         telegram_id = update.effective_user.id
-#         update.message.reply_text(f'Авторизация прошла успешно! {telegram_id}')
-#     #     response = requests.post('http://django_tg_app/auth/api/verify_token/', data={'token': token, 'telegram_id': telegram_id})
-#     #     if response.json().get('status') == 'success':
-#     #         update.message.reply_text('Авторизация прошла успешно!')
-#     #     else:
-#     #         update.message.reply_text('Токен не найден.')
-#     # else:
-#     #     update.message.reply_text('Неверный формат команды.')
-#
