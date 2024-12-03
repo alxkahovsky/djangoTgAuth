@@ -54,7 +54,7 @@ class TelegramAuthSessionViewSet(GenericViewSet):
             try:
                 auth_session = TelegramAuthSession.objects.get(id=session_token)
                 user = TelegramUser.objects.get(session=auth_session)
-                token = jwt_service.generate_access_token(user.id)
+                token = jwt_service.generate_access_token(user.user.id)
                 refresh_token = jwt_service.generate_refresh_token(user.user.id)
                 response = Response(status=status.HTTP_302_FOUND)
                 response.set_cookie('_tid', token, max_age=3600)  # Устанавливаем куки на 1 час
