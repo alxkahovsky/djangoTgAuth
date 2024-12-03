@@ -52,6 +52,11 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',  # Default backend
+    'auth_telegram.auth.SafeJWTAuthentication',  # Your custom backend
+]
+
 ROOT_URLCONF = 'djangoTelegram.urls'
 
 TEMPLATES = [
