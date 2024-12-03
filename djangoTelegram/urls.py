@@ -18,11 +18,14 @@ from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth.decorators import login_required
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
+from auth_telegram.api.router import r as auth_router
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('auth/', include('auth_telegram.urls')),
+    path('', include('auth_telegram.urls')),
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/users/', include(auth_router.urls))
 ]
 
