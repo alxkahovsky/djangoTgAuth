@@ -10,9 +10,14 @@
 </head>
 <body>
     <div class="container">
+        {% if not user.is_authenticated %}
         <h1>Авторизация через Telegram</h1>
         <p>Нажмите кнопку для авторизации:</p>
         <button id="telegram-auth-button">Авторизоваться через Telegram</button>
+        {% else %}
+        <h1>Добро пожаловать!</h1>
+        <p>{{ user.username }} {{ user.telegram_user.telegram_id }}</p>
+        {% endif %}
     </div>
 
 </body>

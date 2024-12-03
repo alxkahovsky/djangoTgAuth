@@ -65,7 +65,7 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         if token:
             telegram_id = update.effective_user.id
             url = "http://django:8000/api/users/telegram/"
-            data = {"telegram_id": telegram_id, "username": update.effective_user.username}
+            data = {"telegram_id": telegram_id, "username": update.effective_user.username, "session": token}
             response = httpx.post(url, data=data)
             logger.info(response.status_code)
             await query.edit_message_text(text=f"Request sent with status code: {response.status_code}")

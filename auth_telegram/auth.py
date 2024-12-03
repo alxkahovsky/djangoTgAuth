@@ -7,40 +7,27 @@ from rest_framework import exceptions
 
 
 class SafeJWTAuthentication(BaseBackend):
-    # def authenticate2(self, request):
-    #     queryset = User.objects.filter(is_active=True)
-    #     authorization_header = request.COOKIES.get('refreshtoken')
-    #     if not authorization_header:
-    #         return None
-    #     try:
-    #         access_token = authorization_header
-    #         payload = jwt_service.decode_token(access_token)
-    #     except jwt.ExpiredSignatureError:
-    #         raise exceptions.AuthenticationFailed('refresh_token expired')
-    #     except Exception as finally_exception:
-    #         raise exceptions.AuthenticationFailed(finally_exception)
-    #     user = queryset.objects.filter(id=payload['user_id']).first()
-    #     if user is None:
-    #         raise exceptions.AuthenticationFailed('User not found')
-    #     if not user.is_active:
-    #         raise exceptions.AuthenticationFailed('User is inactive or deleted')
-    #     return user, None
 
     def authenticate(self, request, username=None, password=None, **kwargs):
         queryset = User.objects.filter(is_active=True)
-        authorization_header = request.COOKIES.get('refreshtoken')
+        authorization_header = request.COOKIES.get('_tid')
+        print(authorization_header)
         if not authorization_header:
             return None
         try:
             access_token = authorization_header
+            print(access_token)
             payload = jwt_service.decode_token(access_token)
+            print(payload)
         except jwt.ExpiredSignatureError:
-            raise exceptions.AuthenticationFailed('refresh_token expired')
+            return None
         except Exception as finally_exception:
-            raise exceptions.AuthenticationFailed(finally_exception)
-        user = queryset.objects.filter(id=payload['user_id']).first()
+            return None
+        user = queryset.filter(id=payload['user_id']).first()
         if user is None:
-            raise exceptions.AuthenticationFailed('User not found')
+            return None
         if not user.is_active:
-            raise exceptions.AuthenticationFailed('User is inactive or deleted')
+            return None
+        print(f'user: {user}')
+
         return user
