@@ -68,15 +68,15 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
                 telegram_id = update.effective_user.id
                 site = SiteAuthConnector(os.environ.get("SITE_AUTH_URL", "http://localhost:8000"))
                 site.complete_auth(telegram_id=str(telegram_id), username=update.effective_user.username, session_key=token)
-                await update.message.reply_text(text=f"Авторизация прошла успешно!")
+                await query.edit_message_text(text=f"Авторизация прошла успешно!")
             except Exception as e:
                 logger.error(f"{e}")
-                await update.message.reply_text(text=f"Ошибка авторизации")
+                await query.edit_message_text(text=f"Ошибка авторизации")
         else:
             logger.info("Token not found.")
-            await update.message.reply_text(text=f"Ошибка авторизации")
+            await query.edit_message_text(text=f"Ошибка авторизации")
     elif query.data == 'no':
-        await update.message.reply_text(text="Операция отменена")
+        await query.edit_message_text(text="Операция отменена")
 
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:

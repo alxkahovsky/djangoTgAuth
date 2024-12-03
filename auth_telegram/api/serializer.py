@@ -31,14 +31,18 @@ class TelegramUserSerializer(serializers.ModelSerializer):
             telegram_user = TelegramUser.objects.create(user=user, session=auth_session, **validated_data)
         return telegram_user
 
+    # ToDo отрефакторить сохранение объектоав БД
     def update(self, instance, validated_data):
         user_data = validated_data.pop('user', {})
         user = instance.user
         for attr, value in user_data.items():
             setattr(user, attr, value)
         user.save()
+        auth_session = TelegramAuthSession.objects.get(**validated_data['session'])
+        validated_data.pop('session')
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
+        instance.session = auth_session
         instance.save()
         return instance
 

@@ -18,8 +18,8 @@ class SiteAuthConnector:
 
     def __is_telegram_bind(self, telegram_id: str) -> bool:
         """Проверяем связку аккаунта на сайте и телеграм аккаунта"""
-        url = f"{self.url}{telegram_id}"
-        response = self.client.head(url)
+        url = f"{self.url}{telegram_id}/"
+        response = self.client.get(url)
         if response.status_code != 200:
             return False
         return True
@@ -43,8 +43,8 @@ class SiteAuthConnector:
 
     def complete_auth(self, telegram_id: str, username: str, session_key: str):
         if self.__is_telegram_bind(telegram_id):
-            self.__bind_telegram(telegram_id, username, session_key)
-        else:
             self.__update_telegram(telegram_id, username, session_key)
+        else:
+            self.__bind_telegram(telegram_id, username, session_key)
 
 
