@@ -1,3 +1,5 @@
+from django.db import transaction
+
 from ..models import User, TelegramUser, TelegramAuthSession
 from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
@@ -12,17 +14,21 @@ class UserSerializer(ModelSerializer):
 
 class TelegramUserSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username')
+    session = serializers.CharField(write_only=True, source='session.id')
 
     class Meta:
         model = TelegramUser
-        fields = ('telegram_id', 'username')
+        fields = ('telegram_id', 'username', 'session')
 
     def create(self, validated_data):
         user_data = validated_data.pop('user')
-        user = User.objects.create(**user_data)
-        user.set_password(generate_password(10))
-        user.save()
-        telegram_user = TelegramUser.objects.create(user=user, **validated_data)
+        with transaction.atomic():
+            user = User.objects.create(**user_data)
+            auth_session = TelegramAuthSession.objects.get(**validated_data['session'])
+            validated_data.pop('session')
+            user.set_password(generate_password(10))
+            user.save()
+            telegram_user = TelegramUser.objects.create(user=user, session=auth_session, **validated_data)
         return telegram_user
 
     def update(self, instance, validated_data):
