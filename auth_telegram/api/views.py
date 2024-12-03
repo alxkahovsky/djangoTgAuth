@@ -16,6 +16,8 @@ class TelegramUserViewSet(RetrieveModelMixin, UpdateModelMixin, CreateModelMixin
     queryset = TelegramUser.objects.all()
     serializer_class = TelegramUserSerializer
     lookup_field = 'telegram_id'
+    lookup_url_kwarg = 'telegram_id'
+
 
 
 class TelegramAuthSessionViewSet(GenericViewSet):
