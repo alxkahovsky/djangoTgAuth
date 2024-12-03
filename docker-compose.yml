@@ -17,3 +17,4 @@ services:
     # https://t.me/yakovlev_auth_bot?start=Token
     environment:
       - TOKEN=7787513972:AAE0mCfbkytK-nvevrj-0neukaHAYXE3fVQ
+      - SITE_AUTH_URL=http://django:8000/api/users/telegram/

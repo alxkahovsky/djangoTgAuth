@@ -21,6 +21,7 @@ from telegram import ForceReply, Update, InlineKeyboardButton, InlineKeyboardMar
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters, CallbackQueryHandler
 import os
 import httpx
+from sdk import SiteAuthConnector
 
 # Enable logging
 logging.basicConfig(
@@ -46,7 +47,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         reply_markup = InlineKeyboardMarkup(keyboard)
 
         await update.message.reply_html(
-            rf"Hi {user.mention_html()}! Do you want to proceed with token {token}?",
+            rf"Hi {user.mention_html()} {user.id}! Do you want to proceed with token {token}?",
             reply_markup=reply_markup,
         )
     else:
@@ -63,16 +64,19 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     if query.data == 'yes':
         token = context.user_data.get('token')
         if token:
-            telegram_id = update.effective_user.id
-            url = "http://django:8000/api/users/telegram/"
-            data = {"telegram_id": telegram_id, "username": update.effective_user.username, "session": token}
-            response = httpx.post(url, data=data)
-            logger.info(response.status_code)
-            await query.edit_message_text(text=f"Request sent with status code: {response.status_code}")
+            try:
+                telegram_id = update.effective_user.id
+                site = SiteAuthConnector(os.environ.get("SITE_AUTH_URL", "http://localhost:8000"))
+                site.complete_auth(telegram_id=str(telegram_id), username=update.effective_user.username, session_key=token)
+                await update.message.reply_text(text=f"Авторизация прошла успешно!")
+            except Exception as e:
+                logger.error(f"{e}")
+                await update.message.reply_text(text=f"Ошибка авторизации")
         else:
-            await query.edit_message_text(text="Token not found.")
+            logger.info("Token not found.")
+            await update.message.reply_text(text=f"Ошибка авторизации")
     elif query.data == 'no':
-        await query.edit_message_text(text="Operation cancelled.")
+        await update.message.reply_text(text="Операция отменена")
 
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
