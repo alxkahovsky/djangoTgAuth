@@ -1,6 +1,5 @@
 from functools import wraps
-from django.contrib.auth import authenticate, login
-from django.http import HttpResponseForbidden
+from django.contrib.auth import login
 from .auth import SafeJWTAuthentication
 
 
@@ -12,6 +11,5 @@ def tg_auth_required(view_func):
         if user is not None:
             login(request, user, backend='auth_telegram.auth.SafeJWTBackend')
             return view_func(request, *args, **kwargs)
-        else:
-            return view_func(request, *args, **kwargs)
+        return view_func(request, *args, **kwargs)
     return _wrapped_view

@@ -17,10 +17,9 @@ bot.
 
 import logging
 
-from telegram import ForceReply, Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters, CallbackQueryHandler
 import os
-import httpx
 from sdk import SiteAuthConnector
 
 # Enable logging
@@ -68,13 +67,13 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
                 telegram_id = update.effective_user.id
                 site = SiteAuthConnector(os.environ.get("SITE_AUTH_URL", "http://localhost:8000"))
                 site.complete_auth(telegram_id=str(telegram_id), username=update.effective_user.username, session_key=token)
-                await query.edit_message_text(text=f"Авторизация прошла успешно!")
+                await query.edit_message_text(text="Авторизация прошла успешно!")
             except Exception as e:
                 logger.error(f"{e}")
-                await query.edit_message_text(text=f"Ошибка авторизации")
+                await query.edit_message_text(text="Ошибка авторизации")
         else:
             logger.info("Token not found.")
-            await query.edit_message_text(text=f"Ошибка авторизации")
+            await query.edit_message_text(text="Ошибка авторизации")
     elif query.data == 'no':
         await query.edit_message_text(text="Операция отменена")
 

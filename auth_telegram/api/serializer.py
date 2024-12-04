@@ -1,5 +1,4 @@
 from django.db import transaction
-
 from ..models import User, TelegramUser, TelegramAuthSession
 from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
@@ -31,7 +30,6 @@ class TelegramUserSerializer(serializers.ModelSerializer):
             telegram_user = TelegramUser.objects.create(user=user, session=auth_session, **validated_data)
         return telegram_user
 
-    # ToDo отрефакторить сохранение объектоав БД
     def update(self, instance, validated_data):
         user_data = validated_data.pop('user', {})
         user = instance.user

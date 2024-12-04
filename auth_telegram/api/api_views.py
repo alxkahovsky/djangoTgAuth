@@ -6,7 +6,6 @@ from rest_framework.mixins import CreateModelMixin, UpdateModelMixin, RetrieveMo
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 from rest_framework.viewsets import GenericViewSet
-
 from ..jwt_services import jwt_service
 from ..models import TelegramUser, TelegramAuthSession
 from .serializer import TelegramUserSerializer, TelegramAuthSessionSerializer
@@ -19,21 +18,21 @@ class TelegramUserViewSet(RetrieveModelMixin, UpdateModelMixin, CreateModelMixin
     lookup_url_kwarg = 'telegram_id'
 
 
-
 class TelegramAuthSessionViewSet(GenericViewSet):
     queryset = TelegramAuthSession.objects.all()
     serializer_class = TelegramAuthSessionSerializer
 
-    def perform_create(self, serializer):
+    @staticmethod
+    def perform_create(serializer):
         serializer.save()
 
-    def get_success_headers(self, data):
+    @staticmethod
+    def get_success_headers(data):
         try:
             return {'Location': str(data[api_settings.URL_FIELD_NAME])}
         except (TypeError, KeyError):
             return {}
 
-    @csrf_exempt
     @action(detail=False, methods=['post'])
     def start(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
