@@ -12,7 +12,7 @@ class SiteAuthConnector:
 
     @staticmethod
     def __check_url(url: str):
-        if not url.startswith("http://") or not url.startswith("https://"):
+        if not url.startswith("http"):
             raise Exception(f"{url} Invalid protocol")
         if not url.endswith("/"):
             raise Exception(f"{url} is not a valid. Try append '/' at the end of the url")

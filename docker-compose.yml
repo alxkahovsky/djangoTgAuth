@@ -6,7 +6,7 @@ services:
     container_name: django_tg_app
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
-      - .:/usr/src/app
+      - .:/djangoTelegram
     # Открытие порта на хостовой машине и перенаправление на порт в контейнере
     ports:
       - "8000:8000"
