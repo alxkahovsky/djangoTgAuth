@@ -46,7 +46,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Обработчик события нажатия на кнопку
     document.getElementById('telegram-auth-button').addEventListener('click', function() {
         getAuthToken(function(token) {
-            // Открываем новую вкладку с токеном в URL
             window.open(`https://t.me/yakovlev_auth_bot?start=${token}`, '_blank');
                    async function checkAuthStatus() {
             let result = false;
@@ -59,19 +58,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
 
                     if (response.status === 200) {
-                        result = true; // Прерываем цикл, если статус 200
+                        result = true;
+                        window.location.reload();
                     } else {
-                        await new Promise(resolve => setTimeout(resolve, interval)); // Пауза перед следующим запросом
+                        await new Promise(resolve => setTimeout(resolve, interval));
                     }
                 } catch (error) {
                     console.error('Ошибка:', error);
-                    await new Promise(resolve => setTimeout(resolve, interval)); // Пауза перед следующим запросом в случае ошибки
+                    await new Promise(resolve => setTimeout(resolve, interval));
                 }
             }
         }
-
         checkAuthStatus();
         });
-
     });
 });
