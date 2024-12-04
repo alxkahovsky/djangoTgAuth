@@ -6,8 +6,6 @@ from .decorators import tg_auth_required
 @ensure_csrf_cookie
 @tg_auth_required
 def auth_page(request):
-    print(request.user)
-    print(request.user.is_authenticated)
     if not request.user.is_authenticated:
         return render(request, 'auth_telegram/auth_start.html')
     else:
