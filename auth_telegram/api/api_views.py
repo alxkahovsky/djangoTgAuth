@@ -1,4 +1,3 @@
-from django.views.decorators.csrf import csrf_exempt
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import status
 from rest_framework.decorators import action
@@ -58,9 +57,11 @@ class TelegramAuthSessionViewSet(GenericViewSet):
                 token = jwt_service.generate_access_token(user.user.id)
                 refresh_token = jwt_service.generate_refresh_token(user.user.id)
                 response = Response(status=status.HTTP_302_FOUND)
-                response.set_cookie('_tid', token, max_age=3600)  # Устанавливаем куки на 1 час
+                # Устанавливаем куки на 1 час, это access_token
+                response.set_cookie('_tid', token, max_age=3600)
+                # Устанавливаем куки на 14 дней, это refresh_token
                 response.set_cookie('_trid', refresh_token, max_age=3600*24*14)
-                redirect_url = '/'  # Замените на ваш URL
+                redirect_url = '/'
                 response['Location'] = redirect_url
                 return response
             except Exception as e:
@@ -68,3 +69,8 @@ class TelegramAuthSessionViewSet(GenericViewSet):
 
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['get'])
+    def refresh(self, request, *args, **kwargs):
+        """Обновление _tid в куках"""
+        pass
