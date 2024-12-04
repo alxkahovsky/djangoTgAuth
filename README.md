@@ -10,3 +10,9 @@
  - В ТЗ не указано должен ли бот быть в составе django-проекта или отдельным сервисом. Я сделал отдельно, для интеграции с Django, создан REST API на (DRF)
  - API работает без авторизации, но в прод нужно ее добавить;
  - В куки добавляется ключ _trid, по сути refresh-token механим обновления ключа доступа я тоже делать не стал
+
+### Запуск проекта:
+    1. `docker-compose build` 
+    2. `docker-compose run django python manage.py migrate` делаем миграции бд
+    3. `docker-compose run django python manage.py createsuperuser` создаем суперпользователя
+    4. `docker-compose up`
